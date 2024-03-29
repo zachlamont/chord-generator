@@ -44,7 +44,9 @@ export function spiceChordJazz(
     case "V":
       // Dominant chords in jazz often use alterations and extensions
       possibleQualities = possibleQualities.filter((quality) =>
-        ["7", "9", "13", "7b9", "7sharp9", "9sharp11"].includes(quality)
+        ["major", "7", "9", "13", "7b9", "7sharp9", "9sharp11"].includes(
+          quality
+        )
       );
       break;
     case "ii":
@@ -61,6 +63,20 @@ export function spiceChordJazz(
         ["major", "maj7", "maj9", "maj11", "maj13"].includes(quality)
       );
       break;
+    case "iii":
+      // The 'iii' chord in jazz, typically minor, can use extensions similar to 'vi'
+      possibleQualities = possibleQualities.filter((quality) =>
+        ["minor", "m7", "m9", "m11"].includes(quality)
+      );
+      break;
+    case "III":
+      // 'III' might be used for a secondary dominant or in a modal context,
+      // so let's treat it with options similar to a 'V' but more restricted
+      possibleQualities = possibleQualities.filter(
+        (quality) => ["major", "7", "9"].includes(quality) // Simplified for demonstration
+      );
+      break;
+
     default:
       // Default to filtering for 'major' or 'minor' if not seventh or extended
       possibleQualities = possibleQualities.filter((quality) =>
@@ -149,6 +165,10 @@ export function provideChordInfo(progressionWithQualities, key) {
     const rootNoteName = getRootNoteName(key, scaleDegree);
     const chordName = `${rootNoteName} ${quality}`; // Combine root note and quality
 
-    return { id, chord, quality, midiKeys, chordName }; // Add chordName to the output
+    // Example duration of 1 bar ("1m" in Tone.js notation)
+    const chordDuration = "1m";
+
+    // Include chordDuration in the returned object
+    return { id, chord, quality, midiKeys, chordName, chordDuration };
   });
 }
