@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useCallback } from "react";
+import * as Tone from "tone";
 import GenreDropdown from "./GenreDropdown";
 import ProgressionDropdown from "./ProgressionDropdown";
 import ChordQualitySelector from "./ChordQualitySelector";
 import BpmSelector from "./BpmSelector";
-import KeySelector from "./KeySelector"; // Import the KeySelector component
+import KeySelector from "./KeySelector";
+import ChordPlayer from "./ChordPlayer";
 import { progressions } from "../constants/constants";
 import {
   spiceChordProgression,
@@ -16,10 +18,21 @@ const ChordProgressionGenerator = () => {
   const [isExtendedChords, setIsExtendedChords] = useState(true);
   const [isSeventhChords, setIsSeventhChords] = useState(true);
   const [selectedBPM, setSelectedBPM] = useState(100);
-  const [selectedKey, setSelectedKey] = useState("C"); // State for selected key
+  const [selectedKey, setSelectedKey] = useState("C");
   const [processedProgression, setProcessedProgression] = useState([]);
+  const [isPlaying, setIsPlaying] = useState(false); // State to control playback
 
-  // Effect to reset progressionId when genre changes
+  // Toggle playback control
+  const togglePlayback = async () => {
+    await Tone.start(); // Start Tone.js in response to user gesture
+    if (!isPlaying) {
+      Tone.Transport.start();
+    } else {
+      Tone.Transport.pause();
+    }
+    setIsPlaying(!isPlaying);
+  };
+
   useEffect(() => {
     setSelectedProgressionId(1);
   }, [genre]);
@@ -37,7 +50,7 @@ const ChordProgressionGenerator = () => {
         isExtendedChords,
         isSeventhChords
       );
-      const translated = provideChordInfo(processed, selectedKey); // Use selectedKey
+      const translated = provideChordInfo(processed, selectedKey);
       setProcessedProgression(translated);
     }
   }, [
@@ -66,10 +79,13 @@ const ChordProgressionGenerator = () => {
         setIsSeventhChords={setIsSeventhChords}
       />
       <BpmSelector selectedBPM={selectedBPM} setSelectedBPM={setSelectedBPM} />
-      <KeySelector
-        selectedKey={selectedKey}
-        setSelectedKey={setSelectedKey}
-      />{" "}
+      <KeySelector selectedKey={selectedKey} setSelectedKey={setSelectedKey} />
+      {/* Pass processedProgression and playback control function to ChordPlayer */}
+      <ChordPlayer
+        processedProgression={processedProgression}
+        isPlaying={isPlaying}
+        togglePlayback={togglePlayback}
+      />
       <div>
         <h2>Chord Progression (Key of {selectedKey})</h2>
         <ul>

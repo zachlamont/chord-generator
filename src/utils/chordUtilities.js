@@ -135,40 +135,66 @@ export function transposeMidiKeys(midiKeys, interval) {
   return midiKeys.map((key) => key + interval);
 }
 
-// Accepts a roman numeral e.g. 'I', 'ii', 'iii', etc. and returns the scale degree (1 for I, 2 for ii, etc.)
-export function romanNumeralToScaleDegree(chord) {
-  const numerals = ["I", "ii", "iii", "IV", "V", "vi", "vii"];
-  const index = numerals.findIndex(
-    (numeral) => numeral.toLowerCase() === chord.toLowerCase()
-  );
-  return index + 1;
+function semitonesFromTonic(romanNumeral) {
+  // Mapping Roman numerals (in lowercase for consistency) to their semitone offsets from the tonic in a major scale
+  const semitoneMap = {
+    i: 0, // Changed to lowercase
+    ii: 2,
+    iii: 4,
+    iv: 5, // Changed to lowercase
+    v: 7, // Changed to lowercase
+    vi: 9,
+    vii: 11,
+  };
+
+  // Convert the entire input to lowercase to ensure consistency
+  const normalizedNumeral = romanNumeral.toLowerCase();
+
+  // Return the semitone offset or 0 if not found
+  return semitoneMap[normalizedNumeral] || 0;
 }
 
-// Accepts a scale degree e.g. '2' and outputs the root note (e.g. 'D') based on the key selected by the user.
-export function getRootNoteName(key, scaleDegree) {
+export function getRootNoteName(key, semitones) {
+  const keys = [
+    "C",
+    "C#",
+    "D",
+    "Eb",
+    "E",
+    "F",
+    "F#",
+    "G",
+    "Ab",
+    "A",
+    "Bb",
+    "B",
+  ];
   const keyIndex = keys.indexOf(key);
-  const noteIndex = (keyIndex + scaleDegree - 1) % keys.length;
+  const noteIndex = (keyIndex + semitones) % keys.length;
   return keys[noteIndex];
 }
 
 //Takes the output of the spiceChordProgression function e.g. [{id: 1, chord: 'ii', quality: 'minor'},{id: 2, chord: 'V', quality: '7'},{id: 3, chord: 'I', quality: 'maj9'}]
 // For each chord, returns an object e.g. {id: 3, chord: 'I', quality: 'maj9', midiKeys: [60, 64, 67, 71, 74], chordName: 'C maj9'}
 export function provideChordInfo(progressionWithQualities, key) {
-  const interval = calculateTransposeInterval(key);
+  const keyTransposeInterval = calculateTransposeInterval(key);
 
-  return progressionWithQualities.map((entry) => {
+  return progressionWithQualities.map((entry, index) => {
     const { id, chord, quality } = entry;
+    // First, transpose midiKeys to the selected key
     let midiKeys = chords[quality]?.midiKeys || [];
-    midiKeys = transposeMidiKeys(midiKeys, interval);
+    midiKeys = transposeMidiKeys(midiKeys, keyTransposeInterval);
 
-    const scaleDegree = romanNumeralToScaleDegree(chord);
-    const rootNoteName = getRootNoteName(key, scaleDegree);
-    const chordName = `${rootNoteName} ${quality}`; // Combine root note and quality
+    // Then, adjust midiKeys by the semitones from the tonic
+    const semitones = semitonesFromTonic(chord);
+    midiKeys = transposeMidiKeys(midiKeys, semitones); // Apply semitone adjustment
 
-    // Example duration of 1 bar ("1m" in Tone.js notation)
+    const rootNoteName = getRootNoteName(key, semitones);
+    const chordName = `${rootNoteName} ${quality}`;
+
     const chordDuration = "1m";
+    const time = `${index}m`;
 
-    // Include chordDuration in the returned object
-    return { id, chord, quality, midiKeys, chordName, chordDuration };
+    return { id, chord, quality, midiKeys, chordName, chordDuration, time };
   });
 }
