@@ -133,6 +133,7 @@ const ChordProgressionGenerator = () => {
         processedProgression={processedProgression}
         isPlaying={isPlaying}
         togglePlayback={togglePlayback}
+        bpm={selectedBPM} // Pass the selectedBPM as props to ChordPlayer
       />
       <ChordVisualiser
         processedProgression={processedProgression}
