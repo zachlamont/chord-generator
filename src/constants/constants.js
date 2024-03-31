@@ -13,6 +13,17 @@ export const keys = [
   "B",
 ];
 
+export const qualities = [
+  "5", "6", "7", "9", "11", "13", "69",
+  "major", "minor", "dim", "dim7",
+  "sus2", "sus4", "7sus4", "aug", "7b5",
+  "aug7", "9b5", "aug9", "7b9", "7sharp9",
+  "9sharp11", "maj7", "maj7b5", "maj7sharp5",
+  "maj9", "maj11", "maj13", "m6", "m69",
+  "m7", "m7b5", "m9", "m11", "mmaj7",
+  "mmaj7b5", "mmaj9", "mmaj11", "add9", "madd9"
+];
+
 export const chords = {
   5: {
     intervals: ["0", "5"],

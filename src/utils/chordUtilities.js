@@ -174,27 +174,67 @@ export function getRootNoteName(key, semitones) {
   return keys[noteIndex];
 }
 
+function calculateSemitonesFromKey(key, newRootNote) {
+  const keys = [
+    "C",
+    "C#",
+    "D",
+    "Eb",
+    "E",
+    "F",
+    "F#",
+    "G",
+    "Ab",
+    "A",
+    "Bb",
+    "B",
+  ];
+
+  const keyIndex = keys.indexOf(key);
+  const newRootIndex = keys.indexOf(newRootNote);
+
+  let semitones = newRootIndex - keyIndex;
+  if (semitones < 0) {
+    semitones += 12; // Ensure a positive semitone distance
+  }
+
+  return semitones;
+}
+
 //Takes the output of the spiceChordProgression function e.g. [{id: 1, chord: 'ii', quality: 'minor'},{id: 2, chord: 'V', quality: '7'},{id: 3, chord: 'I', quality: 'maj9'}]
 // For each chord, returns an object e.g. {id: 3, chord: 'I', quality: 'maj9', midiKeys: [60, 64, 67, 71, 74], chordName: 'C maj9'}
-export function provideChordInfo(progressionWithQualities, key) {
+
+export function provideChordInfo(
+  progressionWithQualities,
+  key,
+  preserveTime = false
+) {
   const keyTransposeInterval = calculateTransposeInterval(key);
 
   return progressionWithQualities.map((entry, index) => {
-    const { id, chord, quality } = entry;
-    // First, transpose midiKeys to the selected key
+    const { id, chord, quality, newRootNote, time: existingTime } = entry;
+
     let midiKeys = chords[quality]?.midiKeys || [];
     midiKeys = transposeMidiKeys(midiKeys, keyTransposeInterval);
 
-    // Then, adjust midiKeys by the semitones from the tonic
-    const semitones = semitonesFromTonic(chord);
-    midiKeys = transposeMidiKeys(midiKeys, semitones); // Apply semitone adjustment
+    const semitones = newRootNote
+      ? calculateSemitonesFromKey(key, newRootNote)
+      : semitonesFromTonic(chord);
+    midiKeys = transposeMidiKeys(midiKeys, semitones);
 
-    const rootNoteName = getRootNoteName(key, semitones);
+    const rootNoteName = newRootNote || getRootNoteName(key, semitones);
     const chordName = `${rootNoteName} ${quality}`;
+    const time = preserveTime && existingTime ? existingTime : `${index}m`;
 
-    const chordDuration = "1m";
-    const time = `${index}m`;
-
-    return { id, chord, quality, midiKeys, chordName, chordDuration, time };
+    return {
+      id,
+      chord,
+      rootNoteName,
+      quality,
+      chordName,
+      midiKeys,
+      chordDuration: "1m",
+      time,
+    };
   });
 }

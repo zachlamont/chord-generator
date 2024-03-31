@@ -1,8 +1,20 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import * as Tone from "tone";
 
 const ChordPlayer = ({ processedProgression, isPlaying, togglePlayback }) => {
+  const partRef = useRef(null);
+  const samplerRef = useRef(null);
+
   useEffect(() => {
+    // Dispose of existing part and sampler if they exist
+    if (partRef.current) {
+      partRef.current.stop();
+      partRef.current.dispose();
+    }
+    if (samplerRef.current) {
+      samplerRef.current.dispose();
+    }
+
     // Initialize the sampler and part only once - when the component mounts
     const newSampler = new Tone.Sampler(
       {
@@ -43,6 +55,10 @@ const ChordPlayer = ({ processedProgression, isPlaying, togglePlayback }) => {
           const newPart = new Tone.Part(playChord, partNotes);
           newPart.start(0);
 
+          // Update refs
+          partRef.current = newPart;
+          samplerRef.current = newSampler;
+
           // Set loop properties
           Tone.Transport.loop = true;
           // Assuming each chord has a duration of "1m" and starts at "0m", "1m", "2m", etc.
@@ -77,4 +93,3 @@ const ChordPlayer = ({ processedProgression, isPlaying, togglePlayback }) => {
 };
 
 export default ChordPlayer;
-

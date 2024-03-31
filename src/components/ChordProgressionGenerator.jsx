@@ -11,6 +11,7 @@ import {
   spiceChordProgression,
   provideChordInfo,
 } from "../utils/chordUtilities";
+import ChordVisualiser from "./ChordVisualiser";
 
 const ChordProgressionGenerator = () => {
   const [genre, setGenre] = useState("Jazz");
@@ -31,6 +32,53 @@ const ChordProgressionGenerator = () => {
       Tone.Transport.pause();
     }
     setIsPlaying(!isPlaying);
+  };
+
+  const handleChordUpdate = (chordId, newQuality) => {
+    // Create a copy of the current progression to avoid direct state mutation
+    let updatedProgression = [...processedProgression];
+
+    // Find the chord that needs updating
+    const chordToUpdateIndex = updatedProgression.findIndex(
+      (chord) => chord.id === chordId
+    );
+
+    if (chordToUpdateIndex !== -1) {
+      // Update the quality of the found chord
+      updatedProgression[chordToUpdateIndex] = {
+        ...updatedProgression[chordToUpdateIndex],
+        quality: newQuality,
+      };
+
+      // Recalculate the chord information for the entire progression to ensure consistency
+      // Especially important if chord qualities affect other chords or if future functionality depends on overall progression
+      // Set `preserveTime` to true to maintain existing chord timings
+      updatedProgression = provideChordInfo(
+        updatedProgression,
+        selectedKey,
+        true
+      );
+    }
+
+    // Update the state with the new, recalculated progression
+    setProcessedProgression(updatedProgression);
+  };
+
+  const handleChordRootChange = (chordId, newRoot) => {
+    // Find and update the specific chord with the new root note
+    const updatedProgression = processedProgression.map((chord) =>
+      chord.id === chordId ? { ...chord, newRootNote: newRoot } : chord
+    );
+
+    // Recalculate the chord details with the new root information
+    const newProgression = provideChordInfo(
+      updatedProgression,
+      selectedKey,
+      true
+    );
+
+    // Update the state with the newly calculated progression
+    setProcessedProgression(newProgression);
   };
 
   useEffect(() => {
@@ -86,13 +134,21 @@ const ChordProgressionGenerator = () => {
         isPlaying={isPlaying}
         togglePlayback={togglePlayback}
       />
+      <ChordVisualiser
+        processedProgression={processedProgression}
+        updateChordQuality={handleChordUpdate}
+        updateChordRoot={handleChordRootChange} // Make sure this is correctly passed
+      />
+
       <div>
         <h2>Chord Progression (Key of {selectedKey})</h2>
         <ul>
           {processedProgression.map((chord) => (
             <li key={chord.id}>
-              Chord: {chord.chord}, Quality: {chord.quality}, Name:{" "}
-              {chord.chordName}, MIDI Keys: {chord.midiKeys.join(", ")}
+              ID: {chord.id}, Chord: {chord.chord}, Root: {chord.rootNoteName},
+              Quality: {chord.quality}, Name: {chord.chordName}, MIDI Keys:{" "}
+              {chord.midiKeys.join(", ")}, Duration: {chord.chordDuration},
+              Time:{chord.time}
             </li>
           ))}
         </ul>
