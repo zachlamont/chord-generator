@@ -1,11 +1,13 @@
 import React, { useEffect, useRef } from "react";
 import * as Tone from "tone";
+import { SAMPLER_INSTRUMENTS } from "../constants/constants";
 
 const ChordPlayer = ({
   processedProgression,
   isPlaying,
   togglePlayback,
   bpm,
+  selectedInstrument, // Include selectedInstrument in the props
 }) => {
   const samplerRef = useRef(null);
 
@@ -17,16 +19,14 @@ const ChordPlayer = ({
     if (samplerRef.current) {
       samplerRef.current.dispose();
     }
-
-    // Initialize the sampler
+    console.log(selectedInstrument);
+    // Initialize the sampler with the correct samples and base URL
     samplerRef.current = new Tone.Sampler(
+      SAMPLER_INSTRUMENTS[selectedInstrument].samples,
       {
-        A1: "A1.mp3",
-        A2: "A2.mp3",
-      },
-      {
-        baseUrl: "https://tonejs.github.io/audio/casio/",
+        baseUrl: `/Samples/${selectedInstrument}/`, // Simplified baseUrl
         onload: () => {
+          console.log(`${selectedInstrument} samples loaded`);
           // Define the function to play chords
           const playChord = (time, { note, dur }) => {
             if (Array.isArray(note)) {
@@ -65,7 +65,7 @@ const ChordPlayer = ({
         },
       }
     ).toDestination();
-  }, [processedProgression, bpm]); // React to changes in the progression or BPM
+  }, [processedProgression, bpm, selectedInstrument]); // React to changes in the progression or BPM
 
   useEffect(() => {
     // Control playback
@@ -84,5 +84,3 @@ const ChordPlayer = ({
 };
 
 export default ChordPlayer;
-
-

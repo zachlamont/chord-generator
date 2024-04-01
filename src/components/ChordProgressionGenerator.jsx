@@ -12,6 +12,7 @@ import {
   provideChordInfo,
 } from "../utils/chordUtilities";
 import ChordVisualiser from "./ChordVisualiser";
+import InstrumentDropdown from "./InstrumentDropdown";
 
 const ChordProgressionGenerator = () => {
   const [genre, setGenre] = useState("Jazz");
@@ -22,6 +23,7 @@ const ChordProgressionGenerator = () => {
   const [selectedKey, setSelectedKey] = useState("C");
   const [processedProgression, setProcessedProgression] = useState([]);
   const [isPlaying, setIsPlaying] = useState(false); // State to control playback
+  const [selectedInstrument, setSelectedInstrument] = useState("piano");
 
   // Toggle playback control
   const togglePlayback = async () => {
@@ -122,6 +124,10 @@ const ChordProgressionGenerator = () => {
         selectedProgressionId={selectedProgressionId}
         setSelectedProgressionId={setSelectedProgressionId}
       />
+      <InstrumentDropdown
+        selectedInstrument={selectedInstrument}
+        setSelectedInstrument={setSelectedInstrument}
+      />
       <ChordQualitySelector
         setIsExtendedChords={setIsExtendedChords}
         setIsSeventhChords={setIsSeventhChords}
@@ -134,6 +140,7 @@ const ChordProgressionGenerator = () => {
         isPlaying={isPlaying}
         togglePlayback={togglePlayback}
         bpm={selectedBPM} // Pass the selectedBPM as props to ChordPlayer
+        selectedInstrument={selectedInstrument}
       />
       <ChordVisualiser
         processedProgression={processedProgression}
