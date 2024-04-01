@@ -13,6 +13,7 @@ import {
 } from "../utils/chordUtilities";
 import ChordVisualiser from "./ChordVisualiser";
 import InstrumentDropdown from "./InstrumentDropdown";
+import PianoKeyboard from "./PianoKeyboard";
 
 const ChordProgressionGenerator = () => {
   const [genre, setGenre] = useState("Jazz");
@@ -148,6 +149,10 @@ const ChordProgressionGenerator = () => {
         processedProgression={processedProgression}
         updateChordQuality={handleChordUpdate}
         updateChordRoot={handleChordRootChange} // Make sure this is correctly passed
+        activeChordIndex={activeChordIndex}
+      />
+      <PianoKeyboard
+        processedProgression={processedProgression}
         activeChordIndex={activeChordIndex}
       />
 

@@ -66,3 +66,38 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+.piano {
+  display: flex;
+  position: relative;
+  height: 120px; /* Adjust as necessary */
+  width: fit-content;
+  background: #eee; /* Optional: adds background to the piano */
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.key {
+  display: inline-block;
+  margin: 1px 0;
+  border: 1px solid black;
+}
+
+.natural {
+  background-color: white;
+  height: 100%;
+  width: 20px; /* Adjust width of white keys */
+}
+
+.accidental {
+  background-color: black;
+  width: 14px; /* Adjust width of black keys */
+  height: 60%; /* Adjust height of black keys */
+  position: absolute;
+  margin: 0;
+  z-index: 1;
+}
+
+.key.active {
+  background-color: yellow; /* Highlight active keys */
+}
