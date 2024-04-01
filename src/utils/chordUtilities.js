@@ -226,6 +226,11 @@ export function provideChordInfo(
     const chordName = `${rootNoteName} ${quality}`;
     const time = preserveTime && existingTime ? existingTime : `${index}m`;
 
+    // Transpose down an octave if the lowest note is above 65
+    if (Math.min(...midiKeys) > 65) {
+      midiKeys = midiKeys.map((note) => note - 12);
+    }
+
     return {
       id,
       chord,
@@ -236,5 +241,16 @@ export function provideChordInfo(
       chordDuration: "1m",
       time,
     };
+  });
+}
+
+export function adjustChordOctave(progression) {
+  return progression.map((chord) => {
+    let { midiKeys } = chord;
+    // Adjust octave down as long as any note exceeds 65
+    while (Math.min(...midiKeys) > 65) {
+      midiKeys = midiKeys.map((note) => note - 12); // Shift all notes down an octave
+    }
+    return { ...chord, midiKeys };
   });
 }

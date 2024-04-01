@@ -10,6 +10,7 @@ import { progressions } from "../constants/constants";
 import {
   spiceChordProgression,
   provideChordInfo,
+  adjustChordOctave,
 } from "../utils/chordUtilities";
 import ChordVisualiser from "./ChordVisualiser";
 import InstrumentDropdown from "./InstrumentDropdown";
@@ -62,15 +63,31 @@ const ChordProgressionGenerator = () => {
         selectedKey,
         true
       );
+      updatedProgression = adjustChordOctave(updatedProgression); // Apply octave adjustment here
     }
 
     // Update the state with the new, recalculated progression
     setProcessedProgression(updatedProgression);
   };
 
+  // Assuming you have a handler for key selection changes
+  const handleKeyChange = (newKey) => {
+    setSelectedKey(newKey); // Update the key state
+
+    // Recalculate chord progression for the new key
+    let recalculatedProgression = provideChordInfo(
+      processedProgression,
+      newKey,
+      true
+    );
+    recalculatedProgression = adjustChordOctave(recalculatedProgression); // Adjust octaves as needed
+
+    setProcessedProgression(recalculatedProgression); // Update the progression state with adjustments
+  };
+
   const handleChordRootChange = (chordId, newRoot) => {
     // Find and update the specific chord with the new root note
-    const updatedProgression = processedProgression.map((chord) =>
+    let updatedProgression = processedProgression.map((chord) =>
       chord.id === chordId ? { ...chord, newRootNote: newRoot } : chord
     );
 
@@ -80,9 +97,10 @@ const ChordProgressionGenerator = () => {
       selectedKey,
       true
     );
+    updatedProgression = adjustChordOctave(newProgression); // Apply octave adjustment here
 
     // Update the state with the newly calculated progression
-    setProcessedProgression(newProgression);
+    setProcessedProgression(updatedProgression);
   };
 
   useEffect(() => {
@@ -102,8 +120,9 @@ const ChordProgressionGenerator = () => {
         isExtendedChords,
         isSeventhChords
       );
-      const translated = provideChordInfo(processed, selectedKey);
-      setProcessedProgression(translated);
+      let translated = provideChordInfo(processed, selectedKey);
+      let updatedProgression = adjustChordOctave(translated); // Ensure octave adjustment is applied
+      setProcessedProgression(updatedProgression);
     }
   }, [
     genre,
@@ -135,7 +154,7 @@ const ChordProgressionGenerator = () => {
         setIsSeventhChords={setIsSeventhChords}
       />
       <BpmSelector selectedBPM={selectedBPM} setSelectedBPM={setSelectedBPM} />
-      <KeySelector selectedKey={selectedKey} setSelectedKey={setSelectedKey} />
+      <KeySelector selectedKey={selectedKey} setSelectedKey={handleKeyChange} />
       {/* Pass processedProgression and playback control function to ChordPlayer */}
       <ChordPlayer
         processedProgression={processedProgression}
