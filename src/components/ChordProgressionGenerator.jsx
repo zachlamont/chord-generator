@@ -173,6 +173,7 @@ const ChordProgressionGenerator = () => {
       <PianoKeyboard
         processedProgression={processedProgression}
         activeChordIndex={activeChordIndex}
+        selectedInstrument={selectedInstrument}
       />
 
       <div>
