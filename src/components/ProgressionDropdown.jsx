@@ -15,9 +15,28 @@ const ProgressionDropdown = ({
     setSelectedProgressionId(Number(event.target.value));
   };
 
+  const handlePrevious = () => {
+    const currentIndex = genreProgressions.findIndex(
+      (prog) => prog.id === selectedProgressionId
+    );
+    const previousIndex =
+      (currentIndex - 1 + genreProgressions.length) % genreProgressions.length;
+    setSelectedProgressionId(genreProgressions[previousIndex].id);
+  };
+
+  const handleNext = () => {
+    const currentIndex = genreProgressions.findIndex(
+      (prog) => prog.id === selectedProgressionId
+    );
+    const nextIndex = (currentIndex + 1) % genreProgressions.length;
+    setSelectedProgressionId(genreProgressions[nextIndex].id);
+  };
+
   return (
     <div>
       <label htmlFor="progression-select">Choose a progression:</label>
+      <button onClick={handlePrevious}>Previous</button>
+
       <select
         id="progression-select"
         value={selectedProgressionId}
@@ -29,6 +48,8 @@ const ProgressionDropdown = ({
           </option>
         ))}
       </select>
+
+      <button onClick={handleNext}>Next</button>
     </div>
   );
 };
