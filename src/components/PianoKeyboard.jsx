@@ -6,6 +6,7 @@ const PianoKeyboard = ({
   processedProgression,
   activeChordIndex,
   selectedInstrument,
+  selectedMidiInput,
 }) => {
   const noteSamplerRef = useRef(null);
   const [activeNotes, setActiveNotes] = useState([]);
@@ -24,6 +25,29 @@ const PianoKeyboard = ({
 
     return () => noteSamplerRef.current?.dispose();
   }, [selectedInstrument]);
+
+  // MIDI input handling
+  useEffect(() => {
+    const handleNoteOn = (e) => {
+      playNote(e.note.number);
+    };
+
+    const handleNoteOff = (e) => {
+      stopNote(e.note.number);
+    };
+
+    if (selectedMidiInput) {
+      selectedMidiInput.addListener("noteon", "all", handleNoteOn);
+      selectedMidiInput.addListener("noteoff", "all", handleNoteOff);
+    }
+
+    return () => {
+      if (selectedMidiInput) {
+        selectedMidiInput.removeListener("noteon", "all", handleNoteOn);
+        selectedMidiInput.removeListener("noteoff", "all", handleNoteOff);
+      }
+    };
+  }, [selectedMidiInput]);
 
   // Function to play a note
   const playNote = (midiNumber) => {

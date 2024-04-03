@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import * as Tone from "tone";
+import { WebMidi } from "webmidi";
 import GenreDropdown from "./GenreDropdown";
 import ProgressionDropdown from "./ProgressionDropdown";
 import ChordQualitySelector from "./ChordQualitySelector";
@@ -14,6 +15,7 @@ import {
 } from "../utils/chordUtilities";
 import ChordVisualiser from "./ChordVisualiser";
 import InstrumentDropdown from "./InstrumentDropdown";
+import MidiInstrumentDropdown from "./MidiInstrumentDropdown";
 import PianoKeyboard from "./PianoKeyboard";
 
 const ChordProgressionGenerator = () => {
@@ -27,6 +29,8 @@ const ChordProgressionGenerator = () => {
   const [isPlaying, setIsPlaying] = useState(false); // State to control playback
   const [selectedInstrument, setSelectedInstrument] = useState("piano");
   const [activeChordIndex, setActiveChordIndex] = useState(null); // Add state to track active chord
+  const [midiInputs, setMidiInputs] = useState([]);
+  const [selectedMidiInput, setSelectedMidiInput] = useState(null);
 
   // Toggle playback control
   const togglePlayback = async () => {
@@ -136,9 +140,24 @@ const ChordProgressionGenerator = () => {
     updateChordProgression();
   }, [updateChordProgression]);
 
+  useEffect(() => {
+    WebMidi.enable()
+      .then(() => {
+        setMidiInputs(WebMidi.inputs);
+
+        // Optionally, auto-select the first input or restore a saved preference
+      })
+      .catch((err) => console.error("WebMidi could not be enabled.", err));
+  }, []);
+
   return (
     <div>
       <h1>Chord Progression Generator</h1>
+      <MidiInstrumentDropdown
+        midiInputs={midiInputs}
+        selectedMidiInput={selectedMidiInput}
+        setSelectedMidiInput={setSelectedMidiInput}
+      />
       <GenreDropdown selectedGenre={genre} setSelectedGenre={setGenre} />
       <ProgressionDropdown
         genre={genre}
@@ -150,8 +169,8 @@ const ChordProgressionGenerator = () => {
         setSelectedInstrument={setSelectedInstrument}
       />
       <ChordQualitySelector
-      isExtendedChords={isExtendedChords}
-      isSeventhChords={isSeventhChords}
+        isExtendedChords={isExtendedChords}
+        isSeventhChords={isSeventhChords}
         setIsExtendedChords={setIsExtendedChords}
         setIsSeventhChords={setIsSeventhChords}
       />
@@ -176,6 +195,7 @@ const ChordProgressionGenerator = () => {
         processedProgression={processedProgression}
         activeChordIndex={activeChordIndex}
         selectedInstrument={selectedInstrument}
+        selectedMidiInput={selectedMidiInput}
       />
 
       <div>
