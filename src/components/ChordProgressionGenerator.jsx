@@ -19,7 +19,7 @@ import PianoKeyboard from "./PianoKeyboard";
 const ChordProgressionGenerator = () => {
   const [genre, setGenre] = useState("Jazz");
   const [selectedProgressionId, setSelectedProgressionId] = useState(1);
-  const [isExtendedChords, setIsExtendedChords] = useState(true);
+  const [isExtendedChords, setIsExtendedChords] = useState(false);
   const [isSeventhChords, setIsSeventhChords] = useState(true);
   const [selectedBPM, setSelectedBPM] = useState(100);
   const [selectedKey, setSelectedKey] = useState("C");
@@ -150,6 +150,8 @@ const ChordProgressionGenerator = () => {
         setSelectedInstrument={setSelectedInstrument}
       />
       <ChordQualitySelector
+      isExtendedChords={isExtendedChords}
+      isSeventhChords={isSeventhChords}
         setIsExtendedChords={setIsExtendedChords}
         setIsSeventhChords={setIsSeventhChords}
       />

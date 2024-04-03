@@ -101,3 +101,7 @@ button:focus-visible {
 .key.active {
   background-color: yellow; /* Highlight active keys */
 }
+
+.selectedQuality {
+  background-color: yellow; /* Highlight active keys */
+}
