@@ -6,6 +6,8 @@ const ChordVisualiser = ({
   updateChordQuality,
   updateChordRoot,
   activeChordIndex,
+  playChordImmediately,
+  setActiveChordIndex, // Accept playChordImmediately function as a prop
 }) => {
   return (
     <div>
@@ -16,6 +18,8 @@ const ChordVisualiser = ({
           updateChordQuality={updateChordQuality}
           updateChordRoot={updateChordRoot}
           isActive={index === activeChordIndex} // Calculate if the chord is active based on index
+          playChordImmediately={playChordImmediately} // Pass playChordImmediately function to each ChordElement
+          setActiveChordIndex={setActiveChordIndex}
         />
       ))}
     </div>

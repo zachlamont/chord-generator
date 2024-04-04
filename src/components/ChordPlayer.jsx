@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useCallback } from "react";
 import * as Tone from "tone";
 import { SAMPLER_INSTRUMENTS } from "../constants/constants";
 
@@ -7,64 +7,67 @@ const ChordPlayer = ({
   isPlaying,
   togglePlayback,
   bpm,
-  selectedInstrument, // Include selectedInstrument in the props
-  setActiveChordIndex, // New prop for updating active chord index
+  selectedInstrument,
+  setActiveChordIndex,
+  setPlayChordImmediately, // Use this to expose playChordImmediately function
 }) => {
   const samplerRef = useRef(null);
 
-  useEffect(() => {
-    Tone.Transport.bpm.value = bpm;
-
+  // New function to play a chord immediately
+  const playChordImmediately = useCallback((midiKeys) => {
     if (samplerRef.current) {
-      samplerRef.current.dispose();
+      midiKeys.forEach((midiKey) => {
+        const note = Tone.Frequency(midiKey, "midi").toNote();
+        samplerRef.current.triggerAttackRelease(note, "1m"); // Play each note for 1 measure
+      });
     }
+  }, []);
 
+  useEffect(() => {
+    // Initialize Tone.Sampler with selected instrument samples
     samplerRef.current = new Tone.Sampler(
       SAMPLER_INSTRUMENTS[selectedInstrument].samples,
       {
         baseUrl: `/Samples/${selectedInstrument}/`,
-        onload: () => {
-          // Define the function to play chords and trigger UI update
-          const playChord = (time, { note, dur, index }) => {
-            if (Array.isArray(note)) {
-              note.forEach((singleNote) => {
-                samplerRef.current.triggerAttackRelease(
-                  Tone.Frequency(singleNote, "midi"),
-                  dur,
-                  time
-                );
-              });
-            } else {
-              samplerRef.current.triggerAttackRelease(
-                Tone.Frequency(note, "midi"),
-                dur,
-                time
-              );
-            }
-            setActiveChordIndex(index); // Update the active chord index
-          };
-
-          // Clear previous schedules
-          Tone.Transport.cancel(0);
-
-          // Schedule chords for playback and UI update
-          processedProgression.forEach((chord, index) => {
-            Tone.Transport.schedule((time) => {
-              playChord(time, {
-                note: chord.midiKeys,
-                dur: chord.chordDuration,
-                index,
-              });
-            }, chord.time);
-          });
-
-          Tone.Transport.loop = true;
-          Tone.Transport.loopStart = 0;
-          Tone.Transport.loopEnd = `${processedProgression.length}m`;
-        },
+        onload: () => console.log(`${selectedInstrument} samples loaded`),
       }
     ).toDestination();
-  }, [processedProgression, bpm, selectedInstrument, setActiveChordIndex]); // Add setActiveChordIndex to dependency array
+
+    // Schedule the chord progression playback
+    processedProgression.forEach((chord, index) => {
+      Tone.Transport.schedule((time) => {
+        chord.midiKeys.forEach((midiKey) => {
+          const note = Tone.Frequency(midiKey, "midi").toNote();
+          samplerRef.current.triggerAttackRelease(
+            note,
+            chord.chordDuration,
+            time
+          );
+        });
+        setActiveChordIndex(index);
+      }, chord.time);
+    });
+
+    // Configure looping of the progression
+    Tone.Transport.loop = true;
+    Tone.Transport.loopStart = 0;
+    Tone.Transport.loopEnd = `${processedProgression.length}m`;
+    Tone.Transport.bpm.value = bpm;
+
+    // Expose the playChordImmediately function to the parent component
+    setPlayChordImmediately(() => playChordImmediately);
+
+    return () => {
+      samplerRef.current?.dispose();
+      Tone.Transport.cancel(0);
+    };
+  }, [
+    processedProgression,
+    bpm,
+    selectedInstrument,
+    setActiveChordIndex,
+    setPlayChordImmediately,
+  ]);
 
   useEffect(() => {
     if (isPlaying) {

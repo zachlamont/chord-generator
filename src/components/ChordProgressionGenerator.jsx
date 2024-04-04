@@ -31,6 +31,7 @@ const ChordProgressionGenerator = () => {
   const [activeChordIndex, setActiveChordIndex] = useState(null); // Add state to track active chord
   const [midiInputs, setMidiInputs] = useState([]);
   const [selectedMidiInput, setSelectedMidiInput] = useState(null);
+  const [playChordImmediately, setPlayChordImmediately] = useState(null);
 
   // Toggle playback control
   const togglePlayback = async () => {
@@ -184,13 +185,16 @@ const ChordProgressionGenerator = () => {
         bpm={selectedBPM} // Pass the selectedBPM as props to ChordPlayer
         selectedInstrument={selectedInstrument}
         setActiveChordIndex={setActiveChordIndex} // Pass function to update active chord index
+        setPlayChordImmediately={setPlayChordImmediately} // Pass a prop to receive the playChordImmediately function
       />
       <ChordVisualiser
         processedProgression={processedProgression}
         updateChordQuality={handleChordUpdate}
         updateChordRoot={handleChordRootChange} // Make sure this is correctly passed
         activeChordIndex={activeChordIndex}
-      />
+        playChordImmediately={playChordImmediately} // Pass playChordImmediately function down to ChordVisualiser
+        setActiveChordIndex={setActiveChordIndex} 
+     />
       <PianoKeyboard
         processedProgression={processedProgression}
         activeChordIndex={activeChordIndex}
