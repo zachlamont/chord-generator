@@ -253,12 +253,16 @@ export function provideChordInfo(
   });
 }
 
-export function adjustChordOctave(progression) {
+export function adjustChordOctave(progression, selectedInstrument) {
   return progression.map((chord) => {
     let { midiKeys } = chord;
     // Adjust octave down as long as any note exceeds 65
     while (Math.min(...midiKeys) > 65) {
       midiKeys = midiKeys.map((note) => note - 12); // Shift all notes down an octave
+    }
+    // If the selected instrument is electric bass, lower each midiKey by an octave
+    if (selectedInstrument === "electricBass") {
+      midiKeys = midiKeys.map((note) => note - 12);
     }
     return { ...chord, midiKeys };
   });

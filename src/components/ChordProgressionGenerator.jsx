@@ -44,7 +44,7 @@ const ChordProgressionGenerator = () => {
     setIsPlaying(!isPlaying);
   };
 
-  const handleChordUpdate = (chordId, newQuality) => {
+  const handleChordUpdate = (chordId, newQuality, selectedInstrument) => {
     // Create a copy of the current progression to avoid direct state mutation
     let updatedProgression = [...processedProgression];
 
@@ -68,7 +68,10 @@ const ChordProgressionGenerator = () => {
         selectedKey,
         true
       );
-      updatedProgression = adjustChordOctave(updatedProgression); // Apply octave adjustment here
+      updatedProgression = adjustChordOctave(
+        updatedProgression,
+        selectedInstrument
+      ); // Apply octave adjustment here
     }
 
     // Update the state with the new, recalculated progression
@@ -76,7 +79,7 @@ const ChordProgressionGenerator = () => {
   };
 
   // Assuming you have a handler for key selection changes
-  const handleKeyChange = (newKey) => {
+  const handleKeyChange = (newKey, selectedInstrument) => {
     setSelectedKey(newKey); // Update the key state
 
     // Recalculate chord progression for the new key
@@ -85,12 +88,15 @@ const ChordProgressionGenerator = () => {
       newKey,
       true
     );
-    recalculatedProgression = adjustChordOctave(recalculatedProgression); // Adjust octaves as needed
+    recalculatedProgression = adjustChordOctave(
+      recalculatedProgression,
+      selectedInstrument
+    ); // Adjust octaves as needed
 
     setProcessedProgression(recalculatedProgression); // Update the progression state with adjustments
   };
 
-  const handleChordRootChange = (chordId, newRoot) => {
+  const handleChordRootChange = (chordId, newRoot, selectedInstrument) => {
     // Find and update the specific chord with the new root note
     let updatedProgression = processedProgression.map((chord) =>
       chord.id === chordId ? { ...chord, newRootNote: newRoot } : chord
@@ -102,7 +108,7 @@ const ChordProgressionGenerator = () => {
       selectedKey,
       true
     );
-    updatedProgression = adjustChordOctave(newProgression); // Apply octave adjustment here
+    updatedProgression = adjustChordOctave(newProgression, selectedInstrument); // Apply octave adjustment here
 
     // Update the state with the newly calculated progression
     setProcessedProgression(updatedProgression);
@@ -126,7 +132,10 @@ const ChordProgressionGenerator = () => {
         isSeventhChords
       );
       let translated = provideChordInfo(processed, selectedKey);
-      let updatedProgression = adjustChordOctave(translated); // Ensure octave adjustment is applied
+      let updatedProgression = adjustChordOctave(
+        translated,
+        selectedInstrument
+      ); // Ensure octave adjustment is applied
       setProcessedProgression(updatedProgression);
     }
   }, [
@@ -135,6 +144,7 @@ const ChordProgressionGenerator = () => {
     isExtendedChords,
     isSeventhChords,
     selectedKey,
+    selectedInstrument,
   ]);
 
   useEffect(() => {
@@ -193,8 +203,8 @@ const ChordProgressionGenerator = () => {
         updateChordRoot={handleChordRootChange} // Make sure this is correctly passed
         activeChordIndex={activeChordIndex}
         playChordImmediately={playChordImmediately} // Pass playChordImmediately function down to ChordVisualiser
-        setActiveChordIndex={setActiveChordIndex} 
-     />
+        setActiveChordIndex={setActiveChordIndex}
+      />
       <PianoKeyboard
         processedProgression={processedProgression}
         activeChordIndex={activeChordIndex}
