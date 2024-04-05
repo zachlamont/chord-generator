@@ -9,7 +9,7 @@ const BpmSelector = ({ selectedBPM, setSelectedBPM }) => {
         const change = event.movementY;
         setSelectedBPM((bpm) => {
           const newBpm = bpm - change; // Decrease if mouse moves up, increase if down
-          return Math.min(140, Math.max(20, newBpm)); // Ensure BPM stays within 20-140
+          return Math.min(160, Math.max(40, newBpm)); // Ensure BPM stays within 20-140
         });
       }
     };
