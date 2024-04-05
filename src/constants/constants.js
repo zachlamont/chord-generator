@@ -260,7 +260,14 @@ export const progressions = {
     {
       genre: "Jazz",
       chordProgressions: [
-        { id: 1, chords: ["ii", "V", "I"] },
+        {
+          id: 1,
+          chords: [
+            { chord: "ii", quality: "minor" },
+            { chord: "V", quality: "7" },
+            { chord: "I", quality: "maj9" },
+          ],
+        },
         { id: 2, chords: ["I", "vi", "ii", "V"] },
         { id: 3, chords: ["iii", "VI", "ii", "V", "I"] },
         { id: 4, chords: ["ii", "V", "iii", "VI"] },

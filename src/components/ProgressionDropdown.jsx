@@ -42,11 +42,27 @@ const ProgressionDropdown = ({
         value={selectedProgressionId}
         onChange={handleChange}
       >
-        {genreProgressions.map((prog) => (
-          <option key={prog.id} value={prog.id}>
-            {prog.chords.join(" ")} (ID: {prog.id})
-          </option>
-        ))}
+        {genreProgressions.map((prog) => {
+          // Function to format the progression based on its structure
+          const formatProgression = (progression) => {
+            return progression
+              .map((chord) => {
+                // If chord is an object, format it as "chordQuality"
+                if (typeof chord === "object" && chord.chord && chord.quality) {
+                  return `${chord.chord}${chord.quality}`;
+                }
+                // If chord is a string, return it as is
+                return chord;
+              })
+              .join(" ");
+          };
+
+          return (
+            <option key={prog.id} value={prog.id}>
+              {formatProgression(prog.chords)}
+            </option>
+          );
+        })}
       </select>
 
       <button onClick={handleNext}>Next</button>

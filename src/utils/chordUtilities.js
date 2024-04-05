@@ -95,6 +95,7 @@ export function spiceChordPop(
 }
 
 //Accepts a chord progression e.g. ["ii", "V", "I"] and user preferences and outputs and array e.g. [{id: 1, chord: 'ii', quality: 'minor'},{id: 2, chord: 'V', quality: '7'},{id: 3, chord: 'I', quality: 'maj9'}]
+
 export function spiceChordProgression(
   progression,
   genre,
@@ -113,8 +114,16 @@ export function spiceChordProgression(
   const spiceFunction =
     genreToSpiceFunction[genre] || genreToSpiceFunction["Jazz"]; // Default to Jazz if genre not found
 
-  return progression.map((chord, index) => {
-    const quality = spiceFunction(chord, isExtendedChords, isSeventhChords);
+  return progression.map((item, index) => {
+    // Check if the input item is an object with 'chord' and 'quality' properties
+    const chord = typeof item === "object" ? item.chord : item;
+    const providedQuality = typeof item === "object" ? item.quality : null;
+
+    // Use provided quality if available; otherwise, determine quality using the spice function
+    const quality =
+      providedQuality ||
+      spiceFunction(chord, isExtendedChords, isSeventhChords);
+
     return {
       id: index + 1,
       chord: chord,
