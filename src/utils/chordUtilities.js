@@ -232,7 +232,7 @@ export function provideChordInfo(
     midiKeys = transposeMidiKeys(midiKeys, semitones);
 
     const rootNoteName = newRootNote || getRootNoteName(key, semitones);
-    const chordName = `${rootNoteName} ${quality}`;
+    const chordName = `${rootNoteName}${quality}`;
     const time = preserveTime && existingTime ? existingTime : `${index}m`;
 
     // Transpose down an octave if the lowest note is above 65

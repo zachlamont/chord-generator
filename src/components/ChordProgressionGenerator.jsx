@@ -17,6 +17,7 @@ import ChordVisualiser from "./ChordVisualiser";
 import InstrumentDropdown from "./InstrumentDropdown";
 import MidiInstrumentDropdown from "./MidiInstrumentDropdown";
 import PianoKeyboard from "./PianoKeyboard";
+import MidiExport from "./MidiExport";
 
 const ChordProgressionGenerator = () => {
   const [genre, setGenre] = useState("Jazz");
@@ -151,6 +152,8 @@ const ChordProgressionGenerator = () => {
     updateChordProgression();
   }, [updateChordProgression]);
 
+  console.log(processedProgression);
+
   useEffect(() => {
     WebMidi.enable()
       .then(() => {
@@ -210,6 +213,11 @@ const ChordProgressionGenerator = () => {
         activeChordIndex={activeChordIndex}
         selectedInstrument={selectedInstrument}
         selectedMidiInput={selectedMidiInput}
+      />
+
+      <MidiExport
+        processedProgression={processedProgression}
+        selectedBPM={selectedBPM}
       />
 
       <div>

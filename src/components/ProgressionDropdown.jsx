@@ -1,18 +1,26 @@
-import React from "react";
-import { progressions as allProgressions } from "../constants/constants"; // Adjust the import path as needed
+import React, { useState } from "react";
+import { progressions as allProgressions } from "../constants/constants";
 
 const ProgressionDropdown = ({
   genre,
   selectedProgressionId,
   setSelectedProgressionId,
 }) => {
-  // Find progressions for the selected genre
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+
   const genreProgressions =
     allProgressions.progressions.find((p) => p.genre === genre)
       ?.chordProgressions || [];
 
-  const handleChange = (event) => {
-    setSelectedProgressionId(Number(event.target.value));
+  const formatProgression = (progression) => {
+    return progression
+      .map((chord) => {
+        if (typeof chord === "object" && chord.chord && chord.quality) {
+          return `${chord.chord}${chord.quality}`;
+        }
+        return chord;
+      })
+      .join(" ");
   };
 
   const handlePrevious = () => {
@@ -32,49 +40,82 @@ const ProgressionDropdown = ({
     setSelectedProgressionId(genreProgressions[nextIndex].id);
   };
 
+  // Find the current progression's name for display, accounting for its structure
+  const currentProgressionName = genreProgressions.find(
+    (prog) => prog.id === selectedProgressionId
+  )
+    ? formatProgression(
+        genreProgressions.find((prog) => prog.id === selectedProgressionId)
+          .chords
+      )
+    : "Select Progression";
+
   return (
-    <div>
-      <label htmlFor="progression-select">Choose a progression:</label>
-      <button onClick={handlePrevious}>Previous</button>
-
-      <select
-        id="progression-select"
-        value={selectedProgressionId}
-        onChange={handleChange}
+    <div className="flex items-center justify-center space-x-2">
+      <button
+        onClick={handlePrevious}
+        className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded"
       >
-        {genreProgressions.map((prog) => {
-          // Function to format the progression based on its structure
-          const formatProgression = (progression) => {
-            return progression
-              .map((chord) => {
-                // If chord is an object, format it as "chordQuality"
-                if (typeof chord === "object" && chord.chord && chord.quality) {
-                  return `${chord.chord}${chord.quality}`;
-                }
-                // If chord is a string, return it as is
-                return chord;
-              })
-              .join(" ");
-          };
+        Previous
+      </button>
 
-          return (
-            <option key={prog.id} value={prog.id}>
-              {formatProgression(prog.chords)}
-            </option>
-          );
-        })}
-      </select>
+      <div className="relative inline-block text-left">
+        <button
+          type="button"
+          className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+          onClick={() => setDropdownOpen(!dropdownOpen)}
+        >
+          {currentProgressionName}
+          <svg
+            className="w-4 h-4 ml-2"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M19 9l-7 7-7-7"
+            />
+          </svg>
+        </button>
+        {dropdownOpen && (
+          <div
+            className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 divide-y divide-gray-100 focus:outline-none z-50"
+            role="menu"
+            aria-orientation="vertical"
+          >
+            <div className="py-1" role="none">
+              {genreProgressions.map((prog) => (
+                <a
+                  key={prog.id}
+                  href="#"
+                  className="text-gray-700 block px-4 py-2 text-sm hover:bg-gray-100"
+                  role="menuitem"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setSelectedProgressionId(prog.id);
+                    setDropdownOpen(false);
+                  }}
+                >
+                  {formatProgression(prog.chords)}
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
 
-      <button onClick={handleNext}>Next</button>
+      <button
+        onClick={handleNext}
+        className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded"
+      >
+        Next
+      </button>
     </div>
   );
 };
 
 export default ProgressionDropdown;
-
-/*Notes
-Default Values: The ChordProgressionGenerator component initializes with a default genre and progression ID. These can be adjusted based on user interaction or other criteria.
-Filtering Progressions: The genreProgressions variable filters the progressions constant to only include those matching the selected genre. This filtered list is passed to ProgressionDropdown.
-Passing Props: ProgressionDropdown receives the filtered progressions, the selected progression ID, and a setter function for updating the selected progression ID. It uses these props to populate its dropdown menu and update the parent component's state when a selection is made.
-ID Handling: Progression IDs are managed as numbers to ensure consistency in type, especially for comparison and state updates.
- */
