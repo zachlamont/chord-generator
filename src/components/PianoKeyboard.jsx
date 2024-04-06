@@ -1,30 +1,14 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState, useEffect } from "react";
 import * as Tone from "tone";
-import { SAMPLER_INSTRUMENTS } from "../constants/constants";
 
 const PianoKeyboard = ({
   processedProgression,
   activeChordIndex,
-  selectedInstrument,
   selectedMidiInput,
+  sampler, // Receive the sampler instance via props
 }) => {
-  const noteSamplerRef = useRef(null);
   const [activeNotes, setActiveNotes] = useState([]);
   const [isMouseDown, setIsMouseDown] = useState(false); // Track if the mouse is pressed down
-
-  // Initialize the sampler for the selected instrument
-  useEffect(() => {
-    noteSamplerRef.current = new Tone.Sampler(
-      SAMPLER_INSTRUMENTS[selectedInstrument].samples,
-      {
-        baseUrl: `/Samples/${selectedInstrument}/`,
-        onload: () =>
-          console.log(`${selectedInstrument} samples loaded for PianoKeyboard`),
-      }
-    ).toDestination();
-
-    return () => noteSamplerRef.current?.dispose();
-  }, [selectedInstrument]);
 
   // MIDI input handling
   useEffect(() => {
@@ -51,15 +35,17 @@ const PianoKeyboard = ({
 
   // Function to play a note
   const playNote = (midiNumber) => {
+    if (!sampler) return; // Ensure there's a sampler instance available
     const note = Tone.Frequency(midiNumber, "midi").toNote();
-    noteSamplerRef.current.triggerAttack(note, Tone.now());
+    sampler.triggerAttack(note, Tone.now());
     setActiveNotes((prev) => [...prev, midiNumber]);
   };
 
   // Function to stop a note
   const stopNote = (midiNumber) => {
+    if (!sampler) return; // Ensure there's a sampler instance available
     const note = Tone.Frequency(midiNumber, "midi").toNote();
-    noteSamplerRef.current.triggerRelease(note, Tone.now());
+    sampler.triggerRelease(note, Tone.now());
     setActiveNotes((prev) => prev.filter((note) => note !== midiNumber));
   };
 

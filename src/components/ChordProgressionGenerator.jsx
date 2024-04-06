@@ -7,17 +7,17 @@ import ChordQualitySelector from "./ChordQualitySelector";
 import BpmSelector from "./BpmSelector";
 import KeySelector from "./KeySelector";
 import ChordPlayer from "./ChordPlayer";
-import { progressions } from "../constants/constants";
-import {
-  spiceChordProgression,
-  provideChordInfo,
-  adjustChordOctave,
-} from "../utils/chordUtilities";
 import ChordVisualiser from "./ChordVisualiser";
 import InstrumentDropdown from "./InstrumentDropdown";
 import MidiInstrumentDropdown from "./MidiInstrumentDropdown";
 import PianoKeyboard from "./PianoKeyboard";
 import MidiExport from "./MidiExport";
+import { progressions, SAMPLER_INSTRUMENTS } from "../constants/constants";
+import {
+  spiceChordProgression,
+  provideChordInfo,
+  adjustChordOctave,
+} from "../utils/chordUtilities";
 
 const ChordProgressionGenerator = () => {
   const [genre, setGenre] = useState("Jazz");
@@ -33,6 +33,45 @@ const ChordProgressionGenerator = () => {
   const [midiInputs, setMidiInputs] = useState([]);
   const [selectedMidiInput, setSelectedMidiInput] = useState(null);
   const [playChordImmediately, setPlayChordImmediately] = useState(null);
+  const [sampler, setSampler] = useState(null); // Add state for Tone.Sampler
+  const [loadingProgress, setLoadingProgress] = useState(0); // 0 to 100
+
+  useEffect(() => {
+    // Reset progress
+    setLoadingProgress(0);
+
+    const samples = SAMPLER_INSTRUMENTS[selectedInstrument].samples;
+    const sampleKeys = Object.keys(samples);
+    const loadedBuffers = {};
+
+    // Load each sample individually
+    let loadedSamples = 0;
+    sampleKeys.forEach((key) => {
+      const url = `/Samples/${selectedInstrument}/${samples[key]}`;
+      const buffer = new Tone.Buffer(url, () => {
+        // Update progress
+        loadedSamples++;
+        setLoadingProgress((loadedSamples / sampleKeys.length) * 100);
+
+        // Store loaded buffer
+        loadedBuffers[key] = buffer.get();
+
+        // If all samples are loaded, construct the Sampler
+        if (loadedSamples === sampleKeys.length) {
+          const newSampler = new Tone.Sampler(loadedBuffers).toDestination();
+          setSampler(newSampler);
+          console.log(`${selectedInstrument} samples loaded`);
+        }
+      });
+    });
+
+    // Cleanup
+    return () => {
+      if (sampler) {
+        sampler.dispose();
+      }
+    };
+  }, [selectedInstrument]);
 
   // Toggle playback control
   const togglePlayback = async () => {
@@ -166,6 +205,23 @@ const ChordProgressionGenerator = () => {
 
   return (
     <div>
+      <div
+        style={{
+          width: "100%",
+          backgroundColor: "#ddd",
+          opacity: loadingProgress < 100 ? 1 : 0,
+          transition: "opacity 0.5s ease",
+        }}
+      >
+        {/* Loading bar progress */}
+        <div
+          style={{
+            height: "20px",
+            width: `${loadingProgress}%`,
+            backgroundColor: "blue",
+          }}
+        ></div>
+      </div>
       <h1>Chord Progression Generator</h1>
       <MidiInstrumentDropdown
         midiInputs={midiInputs}
@@ -199,6 +255,7 @@ const ChordProgressionGenerator = () => {
         selectedInstrument={selectedInstrument}
         setActiveChordIndex={setActiveChordIndex} // Pass function to update active chord index
         setPlayChordImmediately={setPlayChordImmediately} // Pass a prop to receive the playChordImmediately function
+        sampler={sampler} // Pass sampler to ChordPlayer
       />
       <ChordVisualiser
         processedProgression={processedProgression}
@@ -213,6 +270,7 @@ const ChordProgressionGenerator = () => {
         activeChordIndex={activeChordIndex}
         selectedInstrument={selectedInstrument}
         selectedMidiInput={selectedMidiInput}
+        sampler={sampler} // Pass sampler to PianoKeyboard
       />
 
       <MidiExport
